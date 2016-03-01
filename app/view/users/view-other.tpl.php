@@ -12,3 +12,11 @@
 
    
 <p><a href='<?=$this->url->create('users')?>'>Tillbaka</a></p>
+
+<!--frågor som har samma userid som seesion->id-->
+<p><strong>Frågor</strong></p>
+
+
+<!--svar som har samma userid som seesion->id-->
+<p><strong>Svar</strong></p>
+

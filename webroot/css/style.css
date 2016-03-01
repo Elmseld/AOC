@@ -22,7 +22,7 @@ h1 {
  */
 #wrapper {
   margin: 0 auto;
-  width: 980px; 
+  width: 900px; 
   padding: 10px;
 }
 
@@ -127,4 +127,17 @@ h1 {
 	padding: 8px 15px;
 	margin: 5px;
 
+}
+
+.loginbar-spacer {
+	display: inline-block;
+}
+
+#login {
+	color: palevioletred;
+	text-decoration: none;
+}
+
+.inline-div {
+	text-align: right;
 }

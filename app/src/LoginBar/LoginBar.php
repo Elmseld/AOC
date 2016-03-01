@@ -29,9 +29,9 @@ class LoginBar {
         } else {
             // Not logged in, show Login link
             $url = $this->di->get('url')->create('users/add');
-            $login = '<i class="fa fa-user-plus"></i><a href="'.$url.'"> Bli medlem </a><div class="loginbar-spacer"></div>';
+            $login = '<i class="fa fa-user-plus"></i><a id="login" href="'.$url.'"> Bli medlem </a><div class="loginbar-spacer"></div>';
             $url = $this->di->get('url')->create('login');
-            $login .= '<i class="fa fa-sign-in"></i><a href="'.$url.'"> Logga in</a><div class="loginbar-spacer"></div>';
+            $login .= '<i class="fa fa-sign-in"></i><a id="login" href="'.$url.'"> Logga in</a><div class="loginbar-spacer"></div>';
         }
 
         $html = <<<EOD
