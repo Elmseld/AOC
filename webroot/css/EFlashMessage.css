@@ -1,0 +1,38 @@
+/* Info, success, alert and error boxes
+--------------------------------------- */
+
+.info,
+.success,
+.error,
+.alert { 
+	display: inline-block;
+	text-align: center;
+	padding: 1em; 
+	margin-bottom: 1em; 
+	border: 2px solid; 
+	font-size: 20px; 
+	width: 70%}
+
+.info       { 
+	background-color: aliceblue; 
+	color: darkslateblue;
+	border-color: skyblue; 
+}
+
+.success    { 
+	background-color: #dcf8d3; 
+	color: darkcyan; 
+	border-color: greenyellow; 
+}
+
+.alert { 
+	background-color: lemonchiffon; 
+	color: darkgoldenrod; 
+	border-color: gold; 
+}
+
+.error { 
+	background-color: mistyrose; 
+	color: firebrick; 
+	border-color: palevioletred; 
+}
