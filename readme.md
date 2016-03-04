@@ -3,7 +3,7 @@ WGTOTW - AOC
 
 Detta är en hemsida byggd på ramverkat Anax-MVC för examensarbetet i kursen Databasdrivna webbapplikationer med PHP och MVC-ramverk på Blekinge Tekniska Högskola.
 
-Den kräver en databas(sqlite eller MySQL) och en Apache webbserver. Du behöver också Composer för att inkludera extrena moduler som använd i hemsidan, från Packagist.
+Den kräver en databas(sqlite eller MySQL) och en Apache webbserver, MAMP eller WAMP är bra exempel på program för att sätta upp en egen lokal server. Du behöver också Composer för att inkludera extrena moduler som använd i hemsidan, från Packagist.
 
 För installation:
 
