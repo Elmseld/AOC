@@ -54,6 +54,13 @@ class CDIFactoryEnax extends \Anax\DI\CDIFactoryDefault
 				return $controller;
 				
 			});
+						
+			$this->set('AnswerController', function() {
+				$controller = new \Enax\Answers\AnswerController();
+				$controller->setDI($this);
+				return $controller;
+				
+			});
 			
 			$this->set('QuestionController', function() {
 				$controller = new \Enax\Question\QuestionController();
@@ -64,9 +71,16 @@ class CDIFactoryEnax extends \Anax\DI\CDIFactoryDefault
 			
 			// User login
       $this->set('LoginController', function() {
-          $userlogincontroller = new \Enax\Users\UserLoginController();
-          $userlogincontroller->setDI($this);
-          return $userlogincontroller;
+          $controller = new \Enax\Login\LoginController();
+          $controller->setDI($this);
+          return $controller;
+      });
+			
+			// User login
+      $this->set('DatabaseController', function() {
+          $database = new \Enax\Database\DatabaseController();
+          $database->setDI($this);
+          return $database;
       });
 			
 			$this->set('msgFlash', function() {
@@ -75,11 +89,25 @@ class CDIFactoryEnax extends \Anax\DI\CDIFactoryDefault
 			
 			});
 			
-		// Loginbar
+			// Loginbar
       $this->setShared('loginBar', function () {
           $loginbar = new \Enax\LoginBar\LoginBar();
           $loginbar->setDI($this);
           return $loginbar;
+      });
+			
+			// Pager
+      $this->setShared('pager', function() {
+          $pager = new \Enax\Pager\EPager();
+          $pager->setDI($this);
+          return $pager;
+      });
+			
+			// Vote
+      $this->setShared('vote', function() {
+          $vote = new \Enax\Vote\vote();
+          $vote->setDI($this);
+          return $vote;
       });
 			
 			$this->setShared('logger', function () {

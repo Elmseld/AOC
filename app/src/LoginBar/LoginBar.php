@@ -23,15 +23,15 @@ class LoginBar {
             $acronym = $this->di->session->get('acronym');
             $login = '<span class="navbar-img"><img src="'.$gravatar . '" alt="Inloggad som '
             . $this->di->session->get('acronym').'" height="20" width="20"></span>&nbsp;'
-            . '<a href="'.$url.'" title="Inloggad som '.$acronym.'">'.$acronym.'</a><div class="loginbar-spacer"></div>';
+            . '<a id="login" href="'.$url.'" title="Inloggad som '.$acronym.' ">'.$acronym.' </a><div class="loginbar-spacer"></div>';
             $url = $this->di->get('url')->create('logout');
-            $login .= '<i class="fa fa-sign-out"></i><a href="'.$url.'"> Logga ut</a><div class="loginbar-spacer"></div>';
+            $login .= '<a id="login" href="'.$url.'"><i class="fa fa-sign-out"></i> Logga ut</a><div class="loginbar-spacer"></div>';
         } else {
             // Not logged in, show Login link
             $url = $this->di->get('url')->create('users/add');
-            $login = '<i class="fa fa-user-plus"></i><a id="login" href="'.$url.'"> Bli medlem </a><div class="loginbar-spacer"></div>';
+            $login = '<a id="login" href="'.$url.'"><i class="fa fa-user-plus"></i> Bli medlem </a><div class="loginbar-spacer"></div>';
             $url = $this->di->get('url')->create('login');
-            $login .= '<i class="fa fa-sign-in"></i><a id="login" href="'.$url.'"> Logga in</a><div class="loginbar-spacer"></div>';
+            $login .= '<a id="login" href="'.$url.'"><i class="fa fa-sign-in"></i> Logga in</a><div class="loginbar-spacer"></div>';
         }
 
         $html = <<<EOD

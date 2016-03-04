@@ -100,7 +100,6 @@ class EFormLogin extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        //$this->AddOUtput("<p><i>Användaren " . $this->user->acronym . " registrerades</i></p>");
         $this->redirectTo('users/id/' . $this->id);
     }
     /**
@@ -110,7 +109,6 @@ class EFormLogin extends \Mos\HTMLForm\CForm
     public function callbackFail()
     {
         $this->di->msgFlash->error($this->error);
-        //$this->AddOutput("<p><i>Det gick inte att spara. Kontrollera fälten.</i></p>");
         $this->redirectTo();
     }
     /**
@@ -132,10 +130,6 @@ class EFormLogin extends \Mos\HTMLForm\CForm
             $this->di->session->set('acronym', $this->Value('acronym'));
             $this->di->session->set('id', $user->id);
             $this->di->session->set('email', $user->email);
-//            $this->di->session->set('colortheme', $user->colortheme);
-//            if ($user->isAdmin) {
-//                $this->di->session->set('isAdmin', 1);
-//            }
             return true;
         } else {
             $this->error .= 'Felaktigt lösenord.';

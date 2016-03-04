@@ -1,0 +1,12 @@
+.loginbar-spacer {
+	display: inline-block;
+}
+
+#login {
+	color: palevioletred;
+	text-decoration: none;
+}
+
+.inline-div {
+	text-align: right;
+}

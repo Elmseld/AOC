@@ -11,61 +11,63 @@ class EFormAddQuestion extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionaware,
         \Anax\MVC\TRedirectHelpers;
 
+   private $tags;
+    private $lastID;
+
     /**
      * Constructor
      *
      */
-    public function __construct($pagekey, $ip)
-    {
+    public function __construct($tags = null) {
+
+        $this->tags = $tags;
+        $tagTitles = array();
+        foreach ($this->tags as $value) {
+            if ($value->getProperties()['deleted'] == null) {
+                $tagTitles[$value->getProperties()['id']] = $value->getProperties()['name'];
+            }
+        }
+
         parent::__construct([], [
-            'pagekey' => [
-                'type'        => 'hidden',
-                'value'       => $pagekey,
-            ],            
-					
-						'ip' => [
-                'type'        => 'hidden',
-                'value'       => $ip,
-            ],            
-					
-						'content' => [
-                'type'        => 'textarea',
-                'label'       => 'Ny fråga:',
-								'required'		=> true,
-								'validation'	=> ['not_empty'],
+            'title' => [
+            'type'          => 'text',
+            'label'         => 'Titel',
+            'required'      => true,
+            'autofocus'     => true,
+            'validation'    => ['not_empty'],
             ],
-					
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Ditt namn:',
-                'required'    => true,
-                'validation'  => ['not_empty'],
+            'content' => [
+            'type'          => 'textarea',
+            'label'         => 'Fråga',
+            'required'      => true,
+            'validation'    => ['not_empty'],
             ],
-					
-						'web' => [
-							'type'					=> 'url',
-							'label'					=> 'Hemsida:',
-						],
-					
-            'email' => [
-                'type'        => 'email',
-                'required'    => true,
-                'validation'  => ['not_empty', 'email_adress'],
+            'tags' => [
+            'type'          => 'select-multiple',
+            'options'       => $tagTitles,
+            'label'         => 'Ämnestaggar (välj flera med cmd/ctrl nedtryckt)',
+            'required'       => true,
+            'size'          => 5,
             ],
+
             'submit' => [
-                'type'      => 'submit',
-								'value'			=> 'Spara',
-                'callback'  => [$this, 'callbackSubmit'],
+            'type'      => 'submit',
+            'value'     => 'Posta fråga',
+            'callback'  => [$this, 'callbackSubmit'],
             ],
             'reset' => [
-                'type'      => 'reset',
-                'value'     => 'Återställ',
+            'type'      => 'reset',
+            'value'     => 'Rensa',
             ],
-					
-        ]);
-    }
+            'submit-abort' => [
+            'type'      => 'submit',
+            'value'     => 'Avbryt',
+            'formnovalidate' => true,
+            'callback'  => [$this, 'callbackSubmitFail'],
+            ],
 
-
+            ]);
+}
 
     /**
      * Customise the check() method.
@@ -75,7 +77,11 @@ class EFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function check($callIfSuccess = null, $callIfFail = null)
     {
-        return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
+        if ($this->di->request->getPost('submit-abort')) {
+            $this->redirectTo('question');
+        } else {
+            return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
+        }
     }
 
 
@@ -86,26 +92,45 @@ class EFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->AddOutput("<p><i>DoSubmit(): Form was submitted. Do stuff (save to database) and return true (success) or false (failed processing form)</i></p>");
 
+        $now = date('Y-m-d H:i:s');
 
         $this->question = new \Enax\Question\Question();
         $this->question->setDI($this->di);
-        
-        $now = date('Y-m-d H:i:s');
-        
-        $save = $this->question->save([
-            'pagekey' 	=> $this->Value('pagekey'),
-            'ip' 				=> $this->Value('ip'),
-					  'content' 	=> $this->Value('content'),
-            'name' 			=> $this->Value('name'),
-            'web' 			=> $this->Value('web'),
-            'email' 		=> $this->Value('email'),
-            'timestamp' => $now,
-					  'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
+        // Save question
+        $this->question->save([
+            'title'      => strip_tags($this->Value('title')),
+            'content'      => strip_tags($this->Value('content')),
+            'created'   => $now,
+            'upvotes'   => 0,
+            'downvotes' => 0,
+            'questionUserId'  => $this->di->session->get('id')
             ]);
-            
-        return $save ? true : false; 
+        // Save tag2question
+        $this->lastID = $this->question->db->lastInsertId();
+        $selectedTags = $this->di->request->getPost('tags');
+
+        $this->di->db->insert(
+            'tag2question',
+            ['idQuestion', 'idTag']
+        );
+        foreach ($selectedTags as $tagID) {
+            $this->di->db->execute(array($this->lastID, $tagID));
+        }
+
+        return true;
+    }
+
+
+
+    /**
+     * Callback for submit-button.
+     *
+     */
+    public function callbackSubmitFail()
+    {
+        $this->AddOutput("<p><i>DoSubmitFail(): Form was submitted but I failed to process/save/validate it</i></p>");
+        return false;
     }
 
 
@@ -116,13 +141,10 @@ class EFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>"); 
-         $url = $this->Value('pagekey') == 'forum' ? 'forum' : ''; 
-          $this->redirectTo($url); 
+        $this->redirectTo('question/id/' . $this->lastID);
+    }
 
-		}
-	
-	
+
 
     /**
      * Callback What to do when form could not be processed?
@@ -130,7 +152,8 @@ class EFormAddQuestion extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Form was submitted and the Check() method returned false.</i></p>");
+        $this->AddOutput("<p><i>Det gick inte att spara. Kontrollera fälten.</i></p>");
         $this->redirectTo();
     }
-} 
+
+}

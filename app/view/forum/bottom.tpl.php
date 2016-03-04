@@ -1,0 +1,1 @@
+<a class='back-button' href='<?=$this->url->create('forum')?>'>Tillbaka</a>

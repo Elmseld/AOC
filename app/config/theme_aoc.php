@@ -69,8 +69,8 @@ return [
         'title_append' => ' | AOC',
 
         // Stylesheets
-        'stylesheets' => ['css/style.css', 'css/navbar_aoc.css'],
-
+        'stylesheets' => ['css/style.css', 'css/navbar_aoc.css', 'css/font-awesome-4.5.0/css/font-awesome.min.css'],
+			
         // Inline style
         'style' => null,
 

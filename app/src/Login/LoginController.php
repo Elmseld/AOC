@@ -1,8 +1,8 @@
 <?php
 
-namespace Enax\Users;
+namespace Enax\Login;
 
-class UserLoginController implements \Anax\DI\IInjectionAware {
+class LoginController implements \Anax\DI\IInjectionAware {
 
     use \Anax\DI\TInjectable;
     
@@ -40,9 +40,9 @@ class UserLoginController implements \Anax\DI\IInjectionAware {
         $this->theme->setTitle("Logga in");
         $this->views->add('default/page', [
         'title' => "Logga in",
-        'content' => $loginform
+        'content' => $this->di->msgFlash->outputMsgs(). $loginform,
     ]);
-
+        $this->di->msgFlash->clearMsg();
     }
 	
 	

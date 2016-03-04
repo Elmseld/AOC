@@ -1,6 +1,12 @@
-.comments-wrapper, .comments, .comment-form { 
-    width: 718px; 
-} 
 .comment-container { 
-    margin-top: 25px; 
+	display: inline-block;
+	background-color: oldlace;	
+	padding: 5px;
+	margin: 5px 0px;	
+	width: 300px;
+	
 } 
+
+#commentVoted {
+	color: white;
+}

@@ -1,0 +1,58 @@
+#tagsUl li{
+	display: inline-block;
+	list-style-type: none;
+	vertical-align: text-top;
+}
+
+#tags {
+	margin: 5px;
+	padding: 8px 0px;
+	border: 1px solid rosybrown;
+	height: 100px;
+}
+
+#tags a{
+	color: oldlace;
+	text-decoration: none;
+	text-align: center; 
+	padding: 8px 15px;
+	background-color: rosybrown;
+}
+
+#tagDec {
+	color: darksalmon;
+	width: 320px;
+	padding: 8px 15px;
+	margin: 5px;
+
+}
+
+#tagBadge {
+	list-style-type: none;
+	margin: 5px;
+	display: inline-block;
+}
+
+#tagBox {
+	color: oldlace;
+	text-decoration: none;
+	text-align: center; 
+	padding: 8px 15px;
+	margin: 0px 3px;
+	background-color: rosybrown;
+}
+
+#tagBoxSmall {
+	color: oldlace;
+	font-size: 60%;
+	text-decoration: none;
+	text-align: center; 
+	padding: 6px;
+	background-color: rosybrown;
+}
+
+#smallerTextTag {
+	font-size: 70%;
+	margin: 5px;
+	color: rosybrown;
+}

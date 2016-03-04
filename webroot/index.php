@@ -8,13 +8,28 @@ $app->router->add('', function() use ($app) {
 	$content = $app->fileContent->get('index.md');
 	$content = $app->textFilter->doFilter($content, 'shortcode, markdown');
 
-	$byline = $app->fileContent->get('byline.md');
-	$byline = $app->textFilter->doFilter($byline, 'shortcode, markdown');
 	
 		$app->views->add('welcome/page', [
 		'content' => $content,
-		'byline' => $byline,
 	]);
+	
+	 $app->dispatcher->forward([
+      'controller' => 'question',
+      'action' 		 => 'getLatest',
+      'params' 		 => [3],
+  ]);
+
+  $app->dispatcher->forward([
+    'controller' => 'users',
+    'action' 		 => 'getActive',
+    'params'		 => [4],
+]);
+
+    $app->dispatcher->forward([
+      'controller' => 'tags',
+      'action' 		 => 'getMostPopular',
+      'params' 		 => [5, null],
+  ]);
     
 });
 
@@ -51,17 +66,6 @@ $app->router->add('redovisning', function () use ($app){
     ]); 
 }); 
 
-// Router to setup/restore default users
-$app->router->add('setupForum', function () use ($app) {
-
-    //$app->db->setVerbose();
-    $app->dispatcher->forward([
-        'controller' => 'question',
-        'action'     => 'reset-forum',
-    ]);
- 
-});
-
 
 // Rout to KommentarsForum, the discussion page
 $app->router->add('forum', function() use ($app) {
@@ -80,18 +84,6 @@ $app->router->add('forum', function() use ($app) {
 });
 
 
-// Router to setup/restore default users
-$app->router->add('setup', function () use ($app) {
-
-    //$app->db->setVerbose();
-    $app->dispatcher->forward([
-        'controller' => 'users',
-        'action'     => 'setup-users',
-    ]);
- 
-});
-
-
 // Router for viewing and editing users
 $app->router->add('users', function () use ($app) {
 
@@ -105,13 +97,15 @@ $app->router->add('users', function () use ($app) {
 
 });
 
+
+
 // Router to setup/restore default users
-$app->router->add('setupTaggar', function () use ($app) {
+$app->router->add('setupAll', function () use ($app) {
 
     //$app->db->setVerbose();
     $app->dispatcher->forward([
-        'controller' => 'tags',
-        'action'     => 'setup-tags',
+        'controller' => 'database',
+        'action'     => 'setup',
     ]);
  
 });

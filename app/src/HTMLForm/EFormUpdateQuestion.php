@@ -11,164 +11,165 @@ class EFormUpdateQuestion extends \Mos\HTMLForm\CForm
     use \Anax\DI\TInjectionaware,
         \Anax\MVC\TRedirectHelpers;
 
-    /** 
-     * Constructor 
-     * 
-     */ 
-    public function __construct($id, $content, $name, $web, $email, $pagekey) 
-    { 
+    private $error;
+    private $questionUpd;
+    private $tags;
+    private $lastID;
 
-        parent::__construct([], [ 
-            'pagekey' => [ 
-                'type'        => 'hidden', 
-                'value'       => $pagekey, 
-            ], 
+    /**
+     * Constructor
+     *
+     */
+    public function __construct($question, $tags = null)
+    {
+        $this->error = '<span class="flashmsgicon"><i class="fa fa-times-circle fa-2x"></i></span>&nbsp;';
+        $this->questionUpd = $question;
 
-            'id' => [ 
-                'type'        => 'hidden', 
-                'value'       => $id, 
-            ], 
+        // Preselected tags
+        foreach ($question->getProperties()['tags'] as $pre) {
+						 $preselected[] = $pre->getProperties()['id'];
+        }
 
-            'content' => [ 
-                'type'        => 'textarea', 
-                'label'       => 'Kommentar:', 
-                'value'       => $content, 
-                'required'    => true, 
-                'validation'  => ['not_empty'], 
+        $this->tags = $tags;
+        foreach ($this->tags as $value) {
+            $tagTitles[$value->getProperties()['id']] = $value->getProperties()['name'];
+        }
 
-            ], 
+        parent::__construct([], [
+            'title' => [
+            'type'          => 'text',
+            'label'         => 'Titel',
+            'required'      => true,
+            'autofocus'     => true,
+            'validation'    => ['not_empty'],
+            'value'         => $question->getProperties()['title'],
+            ],
+            'content' => [
+            'type'          => 'textarea',
+            'label'         => 'Fråga',
+            'required'      => true,
+            'validation'    => ['not_empty'],
+            'value'         => $question->getProperties()['content'],
+            ],
+            'tags' => [
+            'type'          => 'select-multiple',
+            'options'       => $tagTitles,
+            'checked'      => $preselected,
+            'label'         => 'Ämnestaggar (välj flera med cmd/ctrl nedtryckt)',
+            'required'       => true,
+            'size'          => 5,
+            ],
 
-            'name' => [ 
-                'type'        => 'text', 
-                'label'       => 'Namn:', 
-                'value'       => $name, 
-                'required'    => true, 
-                'validation'  => ['not_empty'], 
-            ], 
+            'submit' => [
+            'type'      => 'submit',
+            'value'     => 'Uppdatera fråga',
+            'callback'  => [$this, 'callbackSubmit'],
+            ],
+            'reset' => [
+            'type'      => 'reset',
+            'value'     => 'Återställ',
+            ],
+            'submit-abort' => [
+            'type'      => 'submit',
+            'value'     => 'Avbryt',
+            'formnovalidate' => true,
+            'callback'  => [$this, 'callbackSubmitFail'],
+            ],
 
-            'web' => [ 
-                'type'        => 'url', 
-                'value'       => $web, 
-                'label'       => 'Hemsida:', 
-            ], 
+            ]);
+}
 
-            'email' => [ 
-                'type'        => 'email', 
-                'value'       => $email, 
-                'label'       => 'E-post:', 
-                'validation'  => ['not_empty', 'email_adress'], 
-            ], 
-
-            'submit' => [ 
-                'type'      => 'submit', 
-                'value'     => 'Spara', 
-                'callback'  => [$this, 'callbackSubmit'], 
-            ], 
-            'submit-reset' => [ 
-                'type'      => 'reset', 
-                'value'     => 'Återställ', 
-            ], 
-
-            'submit-delete' => [ 
-                'type'      => 'submit', 
-                'value'     => 'Radera kommentar', 
-                'callback'  => [$this, 'callbackDelete'] 
-            ], 
-        ]); 
-
-    } 
-        /** 
-         * Customise the check() method. 
-         * 
-         * @param callable $callIfSuccess handler to call if function returns true. 
-         * @param callable $callIfFail    handler to call if function returns true. 
-         */ 
-        public function check($callIfSuccess = null, $callIfFail = null) 
-        { 
-            return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']); 
-        } 
-
-
-
-        /** 
-         * Callback for submit-button. 
-         * 
-         */ 
-        public function callbackSubmit() 
-        { 
-            $this->AddOutput("<p><i>DoSubmit(): Form was submitted. Do stuff (save to database) and return true (success) or false (failed processing form)</i></p>"); 
-            //$this->AddOutput("<p><b>Name: " . $this->Value('name') . "</b></p>"); 
-            //$this->AddOutput("<p><b>Email: " . $this->Value('email') . "</b></p>"); 
-            //$this->AddOutput("<p><b>Phone: " . $this->Value('phone') . "</b></p>"); 
-
-            $this->question = new \Enax\Question\Question(); 
-            $this->question->setDI($this->di); 
-
-            date_default_timezone_set('Europe/Berlin'); 
-                    $now = date('Y-m-d H:i:s'); 
-
-                    $save = $this->question->save([ 
-                        'id' => $this->Value('id'), 
-                        'content' => $this->Value('content'), 
-                        'name' => $this->Value('name'), 
-                        'web' => $this->Value('web'), 
-                        'email' => $this->Value('email'), 
-                        'timestamp' => $now, 
-                        'gravatar' => 'http://www.gravatar.com/avatar/' . md5(strtolower(trim($this->Value('email')))) . '.jpg',
-                    ]); 
-
-                    return $save ? true : false; 
-        } 
-
-
-        /** 
-         * Callback for submit-delete button. 
-         * 
-         */ 
-         public function callbackDelete() 
-         { 
-             $this->questions = new \Enax\Question\Question(); 
-             $this->questions->setDI($this->di); 
-             $res = $this->questions->delete($this->Value('id')); 
-
-             return $res ? true : false; 
-         } 
-
-        /** 
-         * Callback for submit-button. 
-         * 
-         */ 
-        public function callbackSubmitFail() 
-        { 
-            $this->AddOutput("<p><i>DoSubmitFail(): Form was submitted but I failed to process/save/validate it</i></p>"); 
-            return false; 
-        } 
+    /**
+     * Customise the check() method.
+     *
+     * @param callable $callIfSuccess handler to call if function returns true.
+     * @param callable $callIfFail    handler to call if function returns true.
+     */
+    public function check($callIfSuccess = null, $callIfFail = null)
+    {
+        if ($this->di->request->getPost('submit-abort')) {
+            $this->redirectTo('question/id/'. $this->questionUpd->getProperties()['id']);
+        } else {
+            return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
+        }
+    }
 
 
 
-        /** 
-         * Callback What to do if the form was submitted? 
-         * 
-         */ 
-        public function callbackSuccess() 
-        { 
-            $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>"); 
-            $url = $this->Value('pagekey') == 'forum' ? 'forum' : ''; 
-            $this->redirectTo($url); 
+    /**
+     * Callback for submit-button.
+     *
+     */
+    public function callbackSubmit()
+    {
 
-        } 
+        $now = date('Y-m-d H:i:s');
+
+        $this->question = new \Enax\Question\Question();
+        $this->question->setDI($this->di);
+        // Save question
+        $this->question->save([
+            'id' => $this->questionUpd->getProperties()['id'],
+            'title'      => strip_tags($this->Value('title')),
+            'content'      => strip_tags($this->Value('content')),
+            'updated'   => $now,
+            //'questionUserId'  => $this->di->session->get('id')
+            ]);
+
+        // Save tag2question
+        $selectedTags = $this->di->request->getPost('tags');
+        // Clear previous entries
+        $this->di->db->delete(
+            'tag2question',
+            'idQuestion = ?'
+        );
+        $this->di->db->execute([$this->questionUpd->getProperties()['id']]);
+        // Save new entries
+        $this->di->db->insert(
+            'tag2question',
+            ['idQuestion', 'idTag']
+        );
+        foreach ($selectedTags as $tagID) {
+            $this->di->db->execute(array($this->questionUpd->getProperties()['id'], $tagID));
+        }
+
+        return true;
+    }
 
 
 
-        /** 
-         * Callback What to do when form could not be processed? 
-         * 
-         */ 
-        public function callbackFail() 
-        { 
-            $this->AddOutput("<p><i>Form was submitted and the Check() method returned false.</i></p>"); 
-            $this->redirectTo(); 
-        } 
+    /**
+     * Callback for submit-button.
+     *
+     */
+    public function callbackSubmitFail()
+    {
+        $this->AddOutput("<p><i>DoSubmitFail(): Form was submitted but I failed to process/save/validate it</i></p>");
+        return false;
+    }
 
 
-} 
+
+    /**
+     * Callback What to do if the form was submitted?
+     *
+     */
+    public function callbackSuccess()
+    {
+        $this->redirectTo('question/id/' . $this->questionUpd->getProperties()['id']);
+    }
+
+
+
+    /**
+     * Callback What to do when form could not be processed?
+     *
+     */
+    public function callbackFail()
+    {
+        $this->di->msgFlash->error($this->error);
+        //$this->AddOutput("<p><i>Det gick inte att spara. Kontrollera fälten.</i></p>");
+        $this->redirectTo();
+    }
+
+}

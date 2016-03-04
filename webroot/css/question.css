@@ -1,0 +1,79 @@
+#indexQuestionTable {
+	width: 600px;
+	margin: 10px 5px;
+}
+
+#forumTable {
+	width: 800px;
+	margin: 10px 5px;
+}
+
+#questionTitle {
+	color: palevioletred;
+	margin: 10px 5px;
+}
+
+#title {
+	color: rosybrown;
+}
+
+h3 {
+	margin: 1px;
+	border-bottom: 1px solid rosybrown;
+}
+
+#statsBox {
+	width: 25px;
+	background-color: oldlace;
+	font-size: 70%;
+	color: rosybrown;
+	padding: 1px 10px;
+}
+
+#statsDifBox {
+	width: 25px;
+	background-color: rosybrown;
+	font-size: 70%;
+	color: oldlace;
+	padding: 1px 10px;
+}
+
+#questionsUserName {
+	color: rosybrown;
+}
+
+#smallerText {
+	font-size: 70%;
+}
+
+
+#smallerText img {
+	width: 20px;
+	vertical-align: top;
+	padding: 5px;
+}
+
+#questionBox {
+	padding-left: 20px;
+	width: 700px;
+}
+
+#userBox {
+	background-color: oldlace;
+	padding: 15px;
+	margin-top: 30px;
+	text-align: center;
+}
+
+#votes {
+	padding-left: 8px;
+	font-style: normal;
+}
+
+#voted {
+	color: oldlace;
+}
+
+#accepted {
+	color: mediumaquamarine;
+}

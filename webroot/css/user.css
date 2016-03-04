@@ -1,0 +1,33 @@
+#userList {
+		display: inline-block;
+}
+
+.center-align {
+	text-align: center;
+}
+
+.right-align {
+	text-align: right;
+}
+
+.userTabSelected, .userTab {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	width: 18.4em;
+	background-color: oldlace;
+}
+
+.userTabSelected, .userTab:hover {
+	border-top: 3px solid darksalmon;
+}
+
+.userdetails-tab-table {
+	color: rosybrown;
+	width: 56em;
+}
+
+.userdetails-tab-table thead{
+	font-weight: bold;
+}

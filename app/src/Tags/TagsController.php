@@ -6,177 +6,144 @@ namespace Enax\Tags;
  * A controller for users and admin related events.
  *
  */
-class TagsController implements \Anax\DI\IInjectionAware
-{
+class TagsController implements \Anax\DI\IInjectionAware {
+
     use \Anax\DI\TInjectable;
-    
-    
-    /**
-     * Initialize the controller.
-     *
-     * @return void
-     */
-    public function initialize()
-    {
-        $this->tags = new \Enax\Tags\Tags();
-        $this->tags->setDI($this->di);
-    }
-    
-    
-   
-    /**
-     * List all users.
-     *
-     * @return void
-     */
-    public function listAction()
-    {			
-        $all = $this->tags->findAll();
 
-        $this->theme->setTitle("Taggar");
-        $this->views->add('tags/list-all', [
-            'tags' => $all,
-            'title' => "Alla tillgängliga taggar",
-        ]);
-    }
-    
-    
+    private $customhits = array(4, 8, 16);
+
     /**
-     * List all active and not deleted users.
-     *
-     * @return void
-     */
-    public function activeAction()
-    {
-        $all = $this->tags->query()
-            ->where('active IS NOT NULL')
-            ->andWhere('deleted IS NULL')
+    * Initialize the controller.
+    *
+    * @return void
+    */
+    public function initialize() {
+        $this->tag = new \Enax\Tags\Tags();
+        $this->tag->setDI($this->di);
+    }
+
+    /**
+    * List all
+    *
+    * @param int $hits, number of hits per page
+    * @param int $page, page for offset
+    *
+    * @return void
+    */
+    public function listAction($hits = 8, $page = 0) {
+
+        $thits = $this->di->request->getGet('hits') ? $this->di->request->getGet('hits') : $this->di->session->get('thits');
+        $thits = $thits != null ? $thits : 8;
+        $this->di->session->set('thits', $thits);
+        $page = $this->di->request->getGet('page') ? $this->di->request->getGet('page') : 0;
+
+        $all = null;
+
+        $all = $this->tag->query()
+        ->limit($thits)
+        ->offset($page)
+        ->where('deleted IS NULL')
+        ->groupBy('id')
+        ->orderBy('name ASC')
+        ->execute();;
+
+        foreach ($all as $tag) {
+            $this->db->select("COUNT(idQuestion) AS taggedquestions")
+            ->from('tag2question')
+            ->where('idTag = '.$tag->getProperties()['id'])
             ->execute();
- 
-        $this->theme->setTitle("Aktiva användare");
+            $res = $this->db->fetchAll();
+            $tag->setProperties(['taggedquestions' => $res[0]->taggedquestions]);
+        }
+
+        $count = $this->tag->query("COUNT(*) AS count")
+        ->where('deleted IS NULL')
+        ->execute();
+
+        $get = array('hits' => $thits, 'page' => $page);
+        $pagelinks = $this->pager->paginateGet($count[0]->count, 'tag/index', $get, $this->customhits);
+
+        $this->theme->setTitle('Taggar');
         $this->views->add('tags/list-all', [
             'tags' => $all,
-            'title' => "Aktiva Taggar",
+            'pages' => $pagelinks,
+            'title' => 'Taggar',
         ]);
     }
-    
-    
+
     /**
-     * List all inactive and not deleted users.
-     *
-     * @return void
-     */
-    public function isInactiveAction()
-    {
-        $all = $this->tags->query()
-            ->where('active IS NULL')
-            ->andWhere('deleted IS NULL')
-            ->execute();
- 
-        $this->theme->setTitle("Inaktiva användare");
-        $this->views->add('tags/list-all', [
-            'tags' => $all,
-            'title' => "Inaktiva användare",
-        ]);
+    * Find with id.
+    *
+    * @param int $id
+    *
+    * @return void
+    */
+    public function idAction($id = null) {
+
+        $res = $this->tag->find($id);
+
+        if ($res) {
+            $this->theme->setTitle('Tag');
+            $this->views->add('tag/view', [
+                'content' => [$res],
+                'title' => 'Tag Detail view',
+            ], 'main');
+        } else {
+            $url = $this->url->create('tag');
+            $this->response->redirect($url);
+        }
     }
-    
-    
+
     /**
-     * List user with id.
-     *
-     * @param int $id of user to display
-     *
-     * @return void
-     */
-    public function idAction($id = null)
-    {
-        $tags = $this->tags->find($id);
- 
-        $this->theme->setTitle("Detaljer för användare");
-        $this->views->add('tags/view', [
-            'tags'  => $tags,
-            'title' => "Detaljer för användare: ",
+    * Find most popular
+    *
+    * @param int $limit, no of post to fetch
+    *
+    * @return array $populartags, order by most popular
+    */
+    public function getMostPopularAction($limit, $title) {
+        $populartags = null;
+
+        $populartags = $this->tag->query("t.*, COUNT(t2q.idQuestion) AS taggedquestions")
+        ->from('tags AS t')
+        ->join('tag2question AS t2q', 't.id = t2q.idTag')
+        ->where('t.deleted IS NULL')
+        ->groupBy('t.id')
+        ->orderBy('taggedquestions DESC')
+        ->limit($limit)
+        ->execute();
+
+        $this->views->add('tags/list-side', [
+            'title' => $title,
+            'tags' => $populartags,
         ]);
     }
-    
-    
+
     /**
-     * Add new user.
-     *
-     * @param string $acronym of user to add.
-     *
-     * @return void
-     */
-    public function addAction()
-    {
+    * Add new tag form
+    *
+    * @return void
+    */
+    public function addAction() {
 
-        $form = new \Enax\HTMLForm\EFormAdd();
-        $form->setDI($this->di);
-        $form->check();
+        if ($this->di->LoginController->checkLoginAdmin($this->di->session->get('id'))) {
 
-        $this->theme->setTitle("Lägg till ny användare");
-        $this->views->add('default/page', [
-        'title' => "Lägg till ny användare",
-        'content' => $form->getHTML()
-    ]);
+            $this->tag = $this->di->session->get('temptag');
+
+            $form = new \Enax\HTMLForm\EFormAddTag($this->tag);
+            $form->setDI($this->di);
+            $form->check();
+
+            $this->di->theme->setTitle('Nytt ämne');
+            $this->views->add('tag/add', [
+                'title' => 'Nytt ämne',
+                'content' => $this->di->msgFlash->outputMsgs() . $form->getHTML()
+            ]);
+            $this->di->msgFlash->clearMessages();
+        } else {
+            $url = $this->url->create('tag');
+            $this->response->redirect($url);
+        }
 
     }
-
-    
-    
-    /**
-     * Restore/setup user database and setup two example users.
-     *
-     *
-     * @return void
-     */
-    public function setupTagsAction()
-    {
-        
-        $this->db->dropTableIfExists('tags')->execute();
-
-        $this->db->createTable(
-            'tags',
-            [
-                'id' => ['integer', 'primary key', 'not null', 'auto_increment'],
-                'name' => ['varchar(20)', 'unique', 'not null'],
-                'description' => ['varchar(500)'],
-                'questions' => ['integer'],
-            ]
-        )->execute();
-
-        $this->db->insert(
-            'tags',
-            ['name', 'description']
-        );
-
-        $this->db->execute([
-            'Färger',
-            'Alla frågor som handlar om färger, allt från temafärger till vilket format som är bäst.'
-        ]);
-
-        $this->db->execute([
-            'Fonter',
-            'Frågor om olika fonter, vilka som är funkar som default fonter i de olika webbläsarna till vilka som är snyggast och roligast.'
-        ]);
-			
-			  $this->db->execute([
-            'CSS3',
-            'Bu och bä om CSS3 vilka är fördelarna och vilka är nakdelarna och vad är nytt och vad saknas helt enkelt allt inom CSS3.'
-        ]);
-			
-			  $this->db->execute([
-            'Forms',
-            'Frågor om hur man stylar sin formulär på bästa sätt.'
-        ]);
-			
-			  $this->db->execute([
-            'Responsivet',
-            'Frågor om hur man stylar sin responsiva sida på sitt eget sätt.'
-        ]);
-
-        $url = $this->url->create('tags');
-        $this->response->redirect($url);
-    }
-
 }

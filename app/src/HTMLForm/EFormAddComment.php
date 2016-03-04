@@ -9,61 +9,49 @@ namespace Enax\HTMLForm;
 class EFormAddComment extends \Mos\HTMLForm\CForm
 {
     use \Anax\DI\TInjectionaware,
-        \Anax\MVC\TRedirectHelpers;
+    \Anax\MVC\TRedirectHelpers;
+
+    private $postId;
+    private $type;
+    private $pageId;
 
     /**
      * Constructor
      *
      */
-    public function __construct($pagekey, $ip)
+    public function __construct($params = null)
     {
+        $this->postId = $params['postId'];
+        $this->type = $params['type'];
+        $this->pageId = $params['pageId'];
+
         parent::__construct([], [
-            'pagekey' => [
-                'type'        => 'hidden',
-                'value'       => $pagekey,
-            ],            
-					
-						'ip' => [
-                'type'        => 'hidden',
-                'value'       => $ip,
-            ],            
-					
-						'content' => [
-                'type'        => 'textarea',
-                'label'       => 'Ny kommentar:',
-								'required'		=> true,
-								'validation'	=> ['not_empty'],
+            'content' => [
+            'type'          => 'textarea',
+            'label'         => 'Ny kommentar',
+            'required'      => true,
+            'autofocus'     => true,
+            'validation'    => ['not_empty'],
             ],
-					
-            'name' => [
-                'type'        => 'text',
-                'label'       => 'Ditt namn:',
-                'required'    => true,
-                'validation'  => ['not_empty'],
-            ],
-					
-						'web' => [
-							'type'					=> 'url',
-							'label'					=> 'Hemsida:',
-						],
-					
-            'email' => [
-                'type'        => 'email',
-                'required'    => true,
-                'validation'  => ['not_empty', 'email_adress'],
-            ],
+
             'submit' => [
-                'type'      => 'submit',
-								'value'			=> 'Spara',
-                'callback'  => [$this, 'callbackSubmit'],
+            'type'      => 'submit',
+            'value'     => 'Spara',
+            'callback'  => [$this, 'callbackSubmit'],
             ],
             'reset' => [
-                'type'      => 'reset',
-                'value'     => 'Återställ',
+            'type'      => 'reset',
+            'value'     => 'Rensa',
             ],
-					
+            'submit-abort' => [
+            'type'      => 'submit',
+            'value'     => 'Avbryt',
+            'formnovalidate' => true,
+            'callback'  => [$this, 'callbackSubmitFail'],
+            ],
+
         ]);
-    }
+}
 
 
 
@@ -75,7 +63,12 @@ class EFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function check($callIfSuccess = null, $callIfFail = null)
     {
-        return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
+        if ($this->di->request->getPost('submit-abort')) {
+            $this->redirectTo('question/id/'.$this->pageId.'#comments');
+        } else {
+            return parent::check([$this, 'callbackSuccess'], [$this, 'callbackFail']);
+    }
+
     }
 
 
@@ -86,25 +79,42 @@ class EFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSubmit()
     {
-        $this->AddOutput("<p><i>DoSubmit(): Form was submitted. Do stuff (save to database) and return true (success) or false (failed processing form)</i></p>");
-
+        $now = date('Y-m-d H:i:s');
 
         $this->comment = new \Enax\Comment\Comment();
         $this->comment->setDI($this->di);
-        
-        $now = date('Y-m-d H:i:s');
-        
-        $save = $this->comment->save([
-            'pagekey' 	=> $this->Value('pagekey'),
-            'ip' 				=> $this->Value('ip'),
-					  'content' 	=> $this->Value('content'),
-            'name' 			=> $this->Value('name'),
-            'web' 			=> $this->Value('web'),
-            'email' 		=> $this->Value('email'),
-            'timestamp' => $now,
+
+        $this->comment->save([
+            'content'   => strip_tags($this->Value('content')),
+            'created'   => $now,
+            'upvotes'   => 0,
+            'downvotes' => 0,
+            'commentUserId'    => $this->di->session->get('id'),
             ]);
-            
-        return $save ? true : false; 
+
+        // Save comment2 . $this->type
+        $this->lastID = $this->comment->db->lastInsertId();
+
+        $tablename = 'comment2'.$this->type;
+        $this->di->db->insert(
+            $tablename,
+            ['id'.ucfirst($this->type), 'idComment']
+        );
+        $this->di->db->execute(array($this->postId, $this->lastID));
+
+        return true;
+    }
+
+
+
+    /**
+     * Callback for submit-button.
+     *
+     */
+    public function callbackSubmitFail()
+    {
+        $this->AddOutput("<p><i>DoSubmitFail(): Form was submitted but I failed to process/save/validate it</i></p>");
+        return false;
     }
 
 
@@ -115,12 +125,13 @@ class EFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackSuccess()
     {
-        $this->AddOUtput("<p><i>Form was submitted and the callback method returned true.</i></p>");
-        $this->redirectTo();
+        $this->comment = new \Enax\Comment\Comment();
+        $this->comment->setDI($this->di);
 
-		}
-	
-	
+        $this->redirectTo('question/id/'.$this->pageId . '#comment-' . $this->lastID);
+    }
+
+
 
     /**
      * Callback What to do when form could not be processed?
@@ -128,7 +139,7 @@ class EFormAddComment extends \Mos\HTMLForm\CForm
      */
     public function callbackFail()
     {
-        $this->AddOutput("<p><i>Form was submitted and the Check() method returned false.</i></p>");
+        $this->AddOutput("<p><i>Det gick inte att spara. Kontrollera fälten.</i></p>");
         $this->redirectTo();
     }
-} 
+}

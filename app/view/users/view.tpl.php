@@ -1,26 +1,51 @@
-<h1><?=$title?><em><?=$user->getProperties()['acronym']?></em></h1>
+<!-- user view -->
+<article class='article1'>
+    <?=$flash?>
+    <div class="userdetail-left-info">
+        <div class="userdetail-karma-votes">
+            <img src='<?=$user->gravatar?>' alt='Gravatar'>
 
-<!--<pre><?=var_dump($user->getProperties())?></pre>--> 
+            <h3>Karma: <?=$rank?></h3>
+            <?php if ($votes == 1): ?>
+                <p class="smaller-text"><?=$user->getProperties()['acronym']?> har röstat <?=$votes?> gång</p>
+            <?php else : ?>
+                <p class="smaller-text"><?=$user->getProperties()['acronym']?> har röstat <?=$votes?> gånger</p>
+            <?php endif; ?>
+        </div>
 
-
-<!-- User info -->
-<img src="<?=$user->gravatar . '?s=50&d=identicon' ?>" alt="gravatar">
-<p><strong>Namn:</strong> <?=$user->name?></p>
-<p><strong>E-mail:</strong> <?=$user->email?></p>
-<p><strong>Skapad:</strong> <?=$user->created?></p>
-<p><strong>Status:</strong> <?=$user->deleted ? 'Raderad (' . $user->deleted . ')' : ($user->active ? 'Aktiv' : 'Inaktiv')?></p>
-
-
-<p>
-<!-- Options based on user status -->
-<?php if ($user->deleted) : ?>
-    <a href="<?=$this->url->create('users/undo-soft-delete/' . $user->id)?>">Återställ</a>
-<?php elseif ($user->active) : ?>
-    <a href="<?=$this->url->create('users/update/' . $user->id)?>">Uppdatera</a><br>  
-    <a href="<?=$this->url->create('users/deactivate/' . $user->id)?>">Inaktivera</a><br>
-    <a href="<?=$this->url->create('users/soft-delete/' . $user->id)?>">Kasta i papperskorgen</a>
-<?php else : ?>
-    <a href="<?=$this->url->create('users/update/' . $user->id)?>">Uppdatera</a><br>
-   	<a href="<?=$this->url->create('users/activate/' . $user->id)?>">Aktivera</a><br>
-    <a href="<?=$this->url->create('users/soft-delete/' . $user->id)?>">Radera</a>
-<?php endif; ?>
+    </div> <!-- userdetail-left-info -->
+    <div class="userdetail-center-info">
+        <h3><?=$user->getProperties()['acronym']?></h3>
+        <p>Namn: <?=$user->getProperties()['name']?><br/>
+            Email: <a href="mailto:<?=$user->getProperties()['email']?>"><?=$user->getProperties()['email']?></a><br/>
+            Webbsida: <?=$user->getProperties()['url']?><br/>
+            Medlem sedan: <?=$user->getProperties()['created']?><br/>
+            <!-- Aktiverad: <?=$user->getProperties()['active']?><br/> -->
+            <?php if ($user->getProperties()['updated']) : ?>
+                Uppdaterad: <?=$user->getProperties()['updated']?><br/>
+            <?php endif; ?>
+            <?php if ($user->getProperties()['deleted']) : ?>
+                Avslutat konto: <?=$user->getProperties()['deleted']?><br/>
+            <?php endif; ?>
+        </p>
+    </div> <!-- userdetail-center-info -->
+    <?php if ($this->di->LoginController->checkLoginCorrectUser($user->getProperties()['id'])) : ?>
+        <div class="user-actions">
+            <?php if ($user->getProperties()['deleted']): ?>
+                <h4>Avslutat konto</h4>
+            <?php endif; ?>
+            <p>
+                <a href="<?=$this->url->create('users/update').'/' . $user->getProperties()['id']?>"><i class="fa fa-pencil"></i> Redigera</a>
+                <?php if (!$user->getProperties()['deleted']) : ?>
+                    <br><a href="<?=$this->url->create('users/softdelete').'/'.$user->getProperties()['id']?>"><i class="fa fa-trash-o"></i> Avsluta konto</a>
+                <?php else : ?>
+                    <br><a href="<?=$this->url->create('users/undosoftdelete').'/'.$user->getProperties()['id']?>"><i class="fa fa-check"></i> Återskapa konto</a>
+                <?php endif; ?>
+            </p>
+            <?php if ($this->di->session->get('acronym') == $user->getProperties()['acronym']): ?>
+                <p><a href="<?=$this->di->get('url')->create('logout')?>" title="Logga ut"><i class="fa fa-sign-out"></i>Logga ut</a></p>
+            <?php endif; ?>
+        </div> <!-- user-actions -->
+    <?php endif; ?>
+    <hr>
+    <h3>Aktivitet</h3>
