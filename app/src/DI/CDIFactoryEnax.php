@@ -105,7 +105,7 @@ class CDIFactoryEnax extends \Anax\DI\CDIFactoryDefault
 			
 			// Vote
       $this->setShared('vote', function() {
-          $vote = new \Enax\Vote\vote();
+          $vote = new \Enax\Vote\Vote();
           $vote->setDI($this);
           return $vote;
       });

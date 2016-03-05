@@ -1,6 +1,8 @@
 Redovisning Kmom07/10: Projekt och examination
 ====================================
 
+Lösenordet är dessa som användarnamnet för testanvändarna
+
 Wow, nu när man står på andra sidan och ser tillbaka, väldigt kort tillbaka dock då jag precis blivit klar, känner jag bara vilket otroligt spännande projekt! Önskade verkligen att jag hade haft mer tid att spendera på detta projekt, men om tiden har varit knappt på de tidigare kursmomenteten är det ingeting mot detta, dessutom har jag haft csn flåsande i nacken så har verkligen haft tidspress.
 
 Krav 1, 2, 3.

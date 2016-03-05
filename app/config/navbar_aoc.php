@@ -51,7 +51,7 @@ $items = [
 				// This is a menu item
         'redovisning'  => [
             'text'  => 'Redovisningar',
-            'url'   => $this->di->get('url')->create('redovisning#7-10'),
+            'url'   => $this->di->get('url')->create('redovisning'),
             'title' => 'Alla redovisningar för kursmomenten'
         ],
         
