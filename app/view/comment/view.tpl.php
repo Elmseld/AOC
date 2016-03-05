@@ -60,9 +60,9 @@
                 <?php endif; ?>
 
                 <?php if (!$vote): ?>
-                    &nbsp;<a class='upvote-active lowered-letter' href='<?=$this->url->create("comments/upvote/".$comment->getProperties()['id'].'?qid='.$qid)?>' title='Bra kommentar'><i class="fa fa-caret-up fa-2x"></i></a>
+                    &nbsp;<a class='upvote-active lowered-letter' href='<?=$this->url->create("comment/upvote/".$comment->getProperties()['id'].'?qid='.$qid)?>' title='Bra kommentar'><i class="fa fa-caret-up fa-2x"></i></a>
                     &nbsp;<span id="smallerText"><?=$comment->getProperties()['upvotes'] - $comment->getProperties()['downvotes']?></span>
-                    &nbsp;<a class='downvote-active lowered-letter' href='<?=$this->url->create("comments/downvote/".$comment->getProperties()['id'].'?qid='.$qid)?>' title='Mindre bra kommentar'><i class="fa fa-caret-down fa-2x"></i></a>
+                    &nbsp;<a class='downvote-active lowered-letter' href='<?=$this->url->create("comment/downvote/".$comment->getProperties()['id'].'?qid='.$qid)?>' title='Mindre bra kommentar'><i class="fa fa-caret-down fa-2x"></i></a>
                     <?php else : ?>
                         &nbsp;<span class='upvote lowered-letter'><i id="commentVoted" class="fa fa-caret-up fa-2x"></i></span>
                         &nbsp;<span class="smaller-text"><?=$comment->getProperties()['upvotes'] - $comment->getProperties()['downvotes']?></span>

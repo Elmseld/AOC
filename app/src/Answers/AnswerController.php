@@ -190,7 +190,7 @@ class AnswerController implements \Anax\DI\IInjectionAware {
 
         $answerform = true;
 
-        $this->views->add('answer/answer-editform-container', [
+        $this->views->add('answer/editform-container', [
             'answer' => $answer,
             'content' => $form->getHTML()
         ]);

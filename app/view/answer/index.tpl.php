@@ -9,9 +9,9 @@
                 <p>
                 <?php if (!$vote): ?>
                     <span id="smallerText"><?=$answer->getProperties()['upvotes']?></span><br>
-                    <a id="title" class='upvote-active' href='<?=$this->url->create("question/upvote/".$answer->getProperties()['id'])?>' title='Bra fråga'><i class="fa fa-caret-up fa-3x"></i></a><br>
+                    <a id="title" class='upvote-active' href='<?=$this->url->create("answer/upvote/".$answer->getProperties()['id'])?>' title='Bra fråga'><i class="fa fa-caret-up fa-3x"></i></a><br>
                     <i id="votes"><?=$answer->getProperties()['upvotes'] - $answer->getProperties()['downvotes']?></i><br>
-                    <a id="title" class='downvote-active' href='<?=$this->url->create("question/downvote/".$answer->getProperties()['id'])?>' title='Mindre bra fråga'><i class="fa fa-caret-down fa-3x"></i></a><br>
+                    <a id="title" class='downvote-active' href='<?=$this->url->create("answer/downvote/".$answer->getProperties()['id'])?>' title='Mindre bra fråga'><i class="fa fa-caret-down fa-3x"></i></a><br>
                     <span id="smallerText"><?=$answer->getProperties()['downvotes']?></span>
                 <?php else : ?>
                     <span id="smallerText"><?=$answer->getProperties()['upvotes']?></span><br>
@@ -83,7 +83,7 @@
                                         </div>
 
                                         <?php if (isset($answer->getProperties()['updated'])) : ?>
-                                            <div><span id='italics smallerText'>Uppdaterad för
+                                            <div><span id='smallerText'>Uppdaterad för
                                                 <?php $timestamp = strtotime($answer->getProperties()['updated']); ?>
 
                                                 <?php $timeinterval = time() - $timestamp; ?>
